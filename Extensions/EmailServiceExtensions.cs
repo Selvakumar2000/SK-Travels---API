@@ -1,0 +1,30 @@
+﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using SKTravelsApp.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SKTravelsApp.Extensions
+{
+    public static class EmailServiceExtensions
+    {
+        public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration config)
+        {
+            var emailConfig = config.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+            services.AddSingleton(emailConfig);
+            services.AddControllers();
+            services.AddScoped<EmailSender>();
+            services.Configure<FormOptions>(opt =>
+            {
+                opt.ValueLengthLimit = int.MaxValue;
+                opt.MultipartBodyLengthLimit = int.MaxValue;
+                opt.MemoryBufferThreshold = int.MaxValue;
+            });
+
+            return services;
+        }
+    }
+}
