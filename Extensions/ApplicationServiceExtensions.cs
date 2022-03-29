@@ -14,7 +14,10 @@ namespace SKTravelsApp.Extensions
         {         
             //For Jwt Token Creation and Handling
             services.AddScoped<TokenService>();
+            //For Userprofile Management
             services.AddScoped<UserService>();
+            //For Travels Management
+            services.AddScoped<TravelsService>();
 
             return services;
 

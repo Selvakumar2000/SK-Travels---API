@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using SKTravelsApp.Extensions;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,14 @@ namespace SKTravelsApp
             //For CORS policy
             services.AddCors();
 
+            //JSON Serializer
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft
+                .Json.ReferenceLoopHandling.Ignore)
+                .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver
+                = new DefaultContractResolver());
+
             services.AddControllers();
         }
 
@@ -53,7 +62,7 @@ namespace SKTravelsApp
             app.UseRouting();
 
             app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
-                              .WithOrigins("https://localhost:4200", "http://localhost:4200"));
+                              .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://localhost:1200"));
 
             app.UseAuthentication();
 

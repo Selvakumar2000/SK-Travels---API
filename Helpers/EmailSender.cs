@@ -32,46 +32,6 @@ namespace SKTravelsApp.Helpers
             
         }
 
-        public void SendResetPassword(Message message, string username)
-        {
-            try
-            {
-                var emailMessage = CreateEmailForResetMessage(message, username);
-
-                Send(emailMessage);
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        private MimeMessage CreateEmailForResetMessage(Message message, string username)
-        {
-            try
-            {
-                TextInfo myTI = new CultureInfo("en-US", false).TextInfo;
-
-                var emailMessage = new MimeMessage();
-                emailMessage.From.Add(new MailboxAddress(_emailConfig.From));
-                emailMessage.To.AddRange(message.To);
-                emailMessage.Subject = message.Subject;
-
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-                {
-                    Text = string.Format("<h3 style='color:Black'>Hi {0}, click the link to reset your password </h3>" +
-                                         "<a href={1} style='font-weight:700'>Reset Password Link</a>", myTI.ToTitleCase(username), message.Content)
-                };
-
-
-                return emailMessage;
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         private MimeMessage CreateEmailMessage(Message message, string username)
         {
             try
@@ -83,10 +43,10 @@ namespace SKTravelsApp.Helpers
 
                 emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
                 {
-                    Text = string.Format("<h3 style='color:green'>{0} </h3>" +
+                    Text = string.Format("<h3 style='color:blue'>{0} </h3>" +
                                       "<h4 style='color:black'>Hi {1}, " +
-                                      "<p style='color:black'> Welcome To India's Largest Online Shopping Portal</p>" +
-                                      "</h4><br>" + "contact <strong>shopmeportal@gmail.com</strong> for your queries related to ShopMe",
+                                      "<p style='color:black'> Welcome To SK Travels India</p>" +
+                                      "</h4><br>" + "contact <strong>sktravelsindiaportal@gmail.com</strong> for your queries related to SK Travels",
                                        message.Content, username.ToUpper())
                 };
 
@@ -116,6 +76,46 @@ namespace SKTravelsApp.Helpers
             {
                 client.Disconnect(true);
                 client.Dispose();
+            }
+        }
+
+        public void SendResetPasswordLink(Message message, string username)
+        {
+            try
+            {
+                var emailMessage = GenerateResetPasswordLink(message, username);
+
+                Send(emailMessage);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private MimeMessage GenerateResetPasswordLink(Message message, string username)
+        {
+            try
+            {
+                TextInfo myTI = new CultureInfo("en-US", false).TextInfo;
+
+                var emailMessage = new MimeMessage();
+                emailMessage.From.Add(new MailboxAddress(_emailConfig.From));
+                emailMessage.To.AddRange(message.To);
+                emailMessage.Subject = message.Subject;
+
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                {
+                    Text = string.Format("<h3 style='color:#da3394'>Hi {0}, click the link to reset your password </h3>" +
+                                         "<a href={1} style='font-weight:700'>Reset Password Link</a>", myTI.ToTitleCase(username), message.Content)
+                };
+
+
+                return emailMessage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
     }

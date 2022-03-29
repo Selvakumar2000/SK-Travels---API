@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using SKTravelsApp.Entities;
+using SKTravelsApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -52,9 +52,9 @@ namespace SKTravelsApp.BusinessServices
             return status;
         }
 
-        public int Register(AppUser user)
+        public long Register(AppUser user)
         {
-            int i;
+            long i = 0;
             try
             {
                 var connectionString = _config.GetConnectionString("SKTravelsCon");
@@ -73,8 +73,12 @@ namespace SKTravelsApp.BusinessServices
                 cmd.Parameters.AddWithValue("@PasswordSalt", user.PasswordSalt);
                 cmd.Parameters.AddWithValue("@IsEmailSent", user.IsEmailSent);
 
+                SqlDataReader sdr = cmd.ExecuteReader();
 
-                i = cmd.ExecuteNonQuery();
+                while (sdr.Read())
+                {
+                    i = (long)sdr["UserID"];
+                }
 
                 con.Close();
 
@@ -108,7 +112,7 @@ namespace SKTravelsApp.BusinessServices
                 AppUser user = new AppUser();
                 while(sdr.Read())
                 {
-                    user.UserID = (int)sdr["UserID"];
+                    user.UserID = (long)sdr["UserID"];
                     user.FullName = (string)sdr["FullName"];
                     user.Email = (string)sdr["Email"];
                     user.PasswordHash = (byte[])sdr["PasswordHash"];
@@ -117,6 +121,79 @@ namespace SKTravelsApp.BusinessServices
 
                 con.Close();
                 return user;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public string SaveToken(string token, string email)
+        {
+            string fullname = "";
+            try
+            {
+                var connectionString = _config.GetConnectionString("SKTravelsCon");
+
+                SqlConnection con = new SqlConnection(connectionString);
+                con.Open();
+
+                SqlCommand cmd = new SqlCommand("SaveUserToken", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@Token", token);
+
+                SqlDataReader sdr = cmd.ExecuteReader();
+
+                AppUser user = new AppUser();
+                while (sdr.Read())
+                {
+                    fullname = (string)sdr["FullName"];                    
+                }
+
+                con.Close();
+                return fullname;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public int ValidateUser(byte[] passwordHash, byte[] passwordSalt, string email, string token)
+        {
+            int status = 0;
+            try
+            {
+                var connectionString = _config.GetConnectionString("SKTravelsCon");
+
+                SqlConnection con = new SqlConnection(connectionString);
+                con.Open();
+
+                SqlCommand cmd = new SqlCommand("ValidateUser", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@Token", token);
+                cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                cmd.Parameters.AddWithValue("@PasswordSalt", passwordSalt);
+
+                SqlDataReader sdr = cmd.ExecuteReader();
+
+                while (sdr.Read())
+                {
+                    status = (int)sdr["Out"];
+                }
+
+                con.Close();
+                return status;
 
             }
             catch (Exception ex)
